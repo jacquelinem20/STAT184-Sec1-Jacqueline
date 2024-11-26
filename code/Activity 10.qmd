@@ -1,0 +1,146 @@
+---
+title: "Diabetes and Its Drivers"
+format: html
+editor: visual
+author: Paula the Third of Saskatoon
+---
+
+![Diabetes Risk](images/1140-diabetes-risk.jpg)
+
+## Prompt
+
+You're working as a medical researcher at the NIH. Using the dataset provided, which biomarker a most likely driver of diabetes (e.g. *causes* the greatest increase in diabetes risk) -- insulin, glucose, or both equally?
+
+Note: For "outcome", 1=diabetes, 0= no diabetes
+
+## Goal
+
+Determine which biomarker is a more likely driver of diabetes - insulin, glucose, or both?
+
+## Load Necessary Data
+
+We will load the necessary dataset and libraries to perform data visualization and analysis.
+
+```{r}
+#| message: False
+data <- read.csv("C:/Users/jacqu/OneDrive/Desktop/Stat 184/diabetes_dataset.csv")
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+Our next step will be cleaning the data so it is tidied while working with it.
+
+```{r}
+data = data %>% 
+  mutate(Glucose_Quartile = ntile(Glucose, 3)) %>%
+  mutate(Insulin_Quartile = ntile(Insulin, 3))
+```
+
+## Exploratory Data Analysis (EDA)
+
+We will display the data to be able to visualize the data set we are working with.
+
+```{r}
+head(data)
+summary(data)
+```
+
+In our data display we are able to see the first few rows of data with all their data from each column. We are able to view information related to glucose and insulin as well as the person the data is relating to. The summaries allow visual understanding of the data accumulated and how it compares across the board.
+
+### Which biomarker a most likely driver of diabetes (e.g. *causes* the greatest increase in diabetes risk) -- insulin, glucose, or both equally?
+
+To answer this question, we will create different visualizations displaying that data allowing for better analysis.
+
+First we can show the relationship between Insulin and Diabetes, and Glucose and Diabetes along with the density plots.
+
+```{r}
+#| code-fold: true
+#| warning: false
+ggplot(data, aes(x = factor(Outcome), y = log(Insulin))) +
+  geom_boxplot() +
+  labs(x = "Outcome", y = "Insulin", title = "Boxplot of Insulin by Diabetes Outcome") +
+  theme_minimal()
+
+ggplot(data, aes(x = factor(Outcome), y = Glucose)) +
+  geom_boxplot() +
+  labs(x = "Outcome", y = "Glucose", title = "Boxplot of Glucose by Diabetes Outcome") +
+  theme_minimal()
+
+ggplot(data, aes(x = log(Insulin), fill = factor(Outcome))) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Insulin", y = "Density", fill = "Outcome",
+       title = "Density Plot of Insulin by Diabetes Outcome") +
+  theme_minimal() +
+  scale_fill_manual(values = c("0" = "blue", "1" = "red"))
+
+ggplot(data, aes(x = Glucose, fill = factor(Outcome))) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Glucose", y = "Density", fill = "Outcome",
+       title = "Density Plot of Glucose by Diabetes Outcome") +
+  theme_minimal() +
+  scale_fill_manual(values = c("0" = "blue", "1" = "red"))
+```
+
+The first plot shows the relationship between insulin and diabetes. We can see the relationship that when there is higher insulin, the outcome is more often having diabetes. This also applies for glucose, showing the greater amount of glucose often leads to diabetes. Both these two graphs have some outliers that do not hold true to this statement but overall this is often the case.
+
+The density plots allows for clear display of the distribution of insulin and glucose values. When looking at the peaks of the insulin graph you can tell that around 5 and 5.15 is the peak of people who are diagnosed with diabetes. Around 4.5 is the peak for the outcome not being diabetes. You can see the shift being that after about 4.85 mu U/ml of insulin the outcome was more often being diagnosis with diabetes where as before this was more likely not diagnosed. The glucose density plot shows greater density for the outcome not being diabetes. The peak is around 100 for outcome 0 and the peak being 130 for the outcome being 1. We can see the shift from the outcome more often being non-diabetic to more often diabetic around 125 in glucose.
+
+Next, we will show the relationship between glucose and insulin.
+
+```{r}
+#| code-fold: true
+#| warning: false
+ggplot(data, aes(x = Glucose, y = log(Insulin))) +
+  geom_point(alpha = 0.6, color = "blue") +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  labs(x = "Glucose", y = "log(Insulin)",
+       title = "Scatter Plot of Glucose vs. Insulin") +
+  theme_minimal()
+
+summary_data <- data %>%
+  group_by(Glucose_Quartile, Insulin_Quartile) %>%
+  summarise(Outcome_Percent = mean(Outcome == 1) * 100) %>%
+  ungroup()
+```
+
+This plot shows a linear relationship between glucose and insulin. For the most part we can visually see that as the glucose number increase so does insulin. The red line running through the points show this general trend. We are able to see this relationship while also noticing any outliers. It is also clear that as we approach larger glucose numbers there are many other cases that occur where the insulin remains zero. These values are inconclusive, not providing any insight for the audience. We can focus in on the other scatter plot points showing the positive linear relationship.
+
+We can use another visualization to plot the hierarchical effects of glucose & insulin on diabetes
+
+```{r}
+#| code-fold: true
+#| warning: false
+ggplot(summary_data, aes(x = Glucose_Quartile, y = Outcome_Percent, color = factor(Insulin_Quartile))) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Glucose Quantile", y = "Diabetes Rate (%)", color = "Insulin Quantile",
+       title = "Diabetes Rate by Glucose and Insulin Quantiles") +
+  theme_minimal()
+```
+
+Lastly we can use a visualization to plot the hierarchical effects of insulin & glucose on diabetes
+
+```{r}
+#| code-fold: true
+#| warning: false
+ggplot(summary_data, aes(x = Insulin_Quartile, y = Outcome_Percent, color = factor(Glucose_Quartile))) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Insulin Quartile", y = "Diabetes Rate (%)", color = "Glucose Quartile",
+       title = "Diabetes Rate by Glucose and Insulin Quantiles") +
+  theme_minimal()
+
+table(data$Glucose_Quartile, data$Insulin_Quartile)
+
+```
+
+The first plot shows the relationship between glucose quantiles with the outcome percent with each line representing a different insulin quantile. As glucose increases we can see the see the trend that the risk of diabetes will increase. It is clear that in general insulin quantile 2 has a lower risk of diabetes where as 1 and 3 vary as glucose increases. In the end, all three insulin quantiles are about equally likely to lead to diabetes as the glucose quantile is higher.
+
+The second plot shows the relationship between insulin quartiles with the outcome percent with each line representing a different glucose quartile. This plot shows a vary clear relation that no matter the insulin level, higher glucose quartiles lead to a greater risk of diabetes.
+
+The contingency table allows the viewer to determine trends in the data. We are able to see that there is an association between higher glucose level and higher insulin levels. This tells us there is a positive relationship between glucose and insulin.
+
+## Conclusion
+
+According to this diabetes data set both glucose and insulin play important roles as drivers in the risk of diabetes risk. Based on the plots and visuals displayed above glucose is more likely the primary driver of diabetes risk but insulin also play s a crucial role. These two biomarkers work hand in hand with the development of diabetes and their interactions can be used to predict likelihood of getting diagnosed with diabetes.
