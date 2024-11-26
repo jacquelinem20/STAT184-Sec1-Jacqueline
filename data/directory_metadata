@@ -1,0 +1,7 @@
+Directory contains 2 files:
+	1) diabetes_dataset.csv
+	2) diabetes_study.R
+
+diabetes_dataset.csv consains data of interest about diabetes and the biomarkers
+
+diabetes_study.R contains a R script of data analysis related to the dataset
