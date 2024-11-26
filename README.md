@@ -10,8 +10,8 @@ The dataset is the about diabetes and according to Kaggle is originally from the
 
 # Results
  After running our code, we found that glucose is the primary biomarker. Insulin becomes more of a prevelant factor when mixed with glucose but glucose on its own is very important to research and monitor with the risk of diabetes:
-![image1](https://github.com/user-attachments/assets/0d7cfb9e-644d-4177-ad0a-ef24718b5b96)
-![image2](https://github.com/user-attachments/assets/9e860068-08c0-4e23-8257-71b2993f547d)
+![unnamed-chunk-6-1](https://github.com/user-attachments/assets/08ed628f-74c9-4a86-a95c-3d9a340c155d)
+![unnamed-chunk-7-1](https://github.com/user-attachments/assets/d241e671-af36-41db-8cc6-94e555149c2f)
 
 
 # Contact
